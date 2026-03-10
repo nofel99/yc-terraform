@@ -1,0 +1,28 @@
+#cloud-config
+disable_root: false
+
+
+package_update: true
+package_upgrade: true
+
+
+ssh_authorized_keys:
+  - ${ssh_public_key}
+
+write_files:
+  - path: /etc/systemd/system/ssh.socket.d/override.conf
+    content: |
+      [Socket]
+      ListenStream=
+      ListenStream=${ssh_port}
+      BindIPv6Only=no
+    permissions: '0644'
+
+
+runcmd:
+  - sed -i 's/^#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+  - systemctl daemon-reload
+  - systemctl restart ssh.socket
+  - systemctl restart ssh
+
+

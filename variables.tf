@@ -32,10 +32,9 @@ variable "image_id" {
   default     = "fd8kgf1n4lk46ce8mrvg"
 }
 
-variable "ssh_public_key_path" {
-  description = "Path to SSH public key"
+variable "ssh_public_key" {
+  description = "SSH public key"
   type        = string
-  default     = "~/.ssh/yc-dev.pub"
 }
 
 variable "vms" {
@@ -56,5 +55,5 @@ variable "vms" {
 variable "ssh_port" {
   description = "SSH port"
   type        = number
-  default     = 5476
+  default     = 22
 }

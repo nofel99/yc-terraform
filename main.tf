@@ -19,10 +19,17 @@ resource "yandex_vpc_security_group" "main" {
 
   ingress {
     protocol       = "TCP"
-    description    = "SSH"
+    description    = "SSH custom port"
     v4_cidr_blocks = ["0.0.0.0/0"]
     port           = var.ssh_port
   }
+
+#  ingress {
+#    protocol       = "TCP"
+#    description    = "SSH port 22 (temporary)"
+#    v4_cidr_blocks = ["0.0.0.0/0"]
+#    port           = 22
+#  }
 
   ingress {
     protocol       = "TCP"
@@ -53,31 +60,12 @@ resource "yandex_vpc_security_group" "main" {
 # ─── SSH Key & User-Data ────────────────────────────────────────────────────────
 
 locals {
-  ssh_public_key = file(var.ssh_public_key_path)
+  ssh_public_key = var.ssh_public_key
 
-  user_data = <<-EOF
-    #!/bin/bash
-    set -e
-
-    # Обновляем пакеты
-    apt update && apt upgrade -y
-
-    # Разрешаем root вход по SSH
-    sed -i 's/^#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
-    sed -i 's/^PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
-
-    # Меняем порт SSH
-    sed -i 's/^Port 22/Port ${var.ssh_port}/' /etc/ssh/sshd_config
-
-    # Добавляем SSH ключ для root
-    mkdir -p /root/.ssh
-    echo "${local.ssh_public_key}" >> /root/.ssh/authorized_keys
-    chmod 700 /root/.ssh
-    chmod 600 /root/.ssh/authorized_keys
-
-    # Перезапускаем SSH
-    reboot
-  EOF
+  user_data = templatefile("${path.module}/meta.yml", {
+    ssh_public_key = local.ssh_public_key
+    ssh_port       = var.ssh_port
+  })
 }
 
 # ─── Virtual Machines ───────────────────────────────────────────────────────────
@@ -117,7 +105,11 @@ resource "yandex_compute_instance" "vms" {
 
   metadata = {
     user-data = local.user_data
+    serial-port-enable = "1"
+    enable-oslogin     = "true"
   }
+
+
 
   labels = {
     environment = "dev"
