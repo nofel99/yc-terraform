@@ -1,0 +1,15 @@
+#cloud-config
+disable_root: false
+
+
+package_update: true
+package_upgrade: true
+
+
+ssh_authorized_keys:
+  - ${ssh_public_key}
+
+runcmd:
+  - sed -i 's/^#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+  - echo "ListenAddress 0.0.0.0" >> /etc/ssh/sshd_config
+  - systemctl restart ssh

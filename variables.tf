@@ -47,7 +47,8 @@ variable "vms" {
     preemptible   = bool
     ip_address    = string
     hostname      = string
-    nat           = bool
+    platform_id   = optional(string, "standard-v3") 
+    nat           = optional(bool,false)
     role          = string
   }))
 }

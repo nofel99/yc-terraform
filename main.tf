@@ -62,11 +62,17 @@ resource "yandex_vpc_security_group" "main" {
 locals {
   ssh_public_key = var.ssh_public_key
 
-  user_data = templatefile("${path.module}/meta.yml", {
+  user_data_admin = templatefile("${path.module}/meta-admin.yml", {
     ssh_public_key = local.ssh_public_key
     ssh_port       = var.ssh_port
   })
+
+  user_data_node = templatefile("${path.module}/meta-node.yml", {
+    ssh_public_key = local.ssh_public_key
+  })
 }
+
+
 
 # ─── Virtual Machines ───────────────────────────────────────────────────────────
 
@@ -75,7 +81,7 @@ resource "yandex_compute_instance" "vms" {
 
   name        = each.key
   hostname    = each.value.hostname
-  platform_id = "standard-v3"
+  platform_id = each.value.platform_id
   zone        = var.zone
 
   resources {
@@ -103,8 +109,9 @@ resource "yandex_compute_instance" "vms" {
     nat                = each.value.nat
   }
 
+
   metadata = {
-    user-data = local.user_data
+    user-data          = each.key == "admin" ? local.user_data_admin : local.user_data_node
     serial-port-enable = "1"
     enable-oslogin     = "true"
   }
@@ -136,4 +143,5 @@ output "all_internal_ips" {
     }
   }
 }
+
 
