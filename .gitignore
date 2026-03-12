@@ -6,9 +6,17 @@ backend.hcl
 *.tfstate.*
 *.tfstate.backup
 
+# Временные файлы от plan
+*.tfplan
+
+# Сгенерированные конфиги
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
 # ─── Terraform рабочие файлы ───────────────────────────────────────────────────
 .terraform/
-.terraform.lock.hcl
 
 # ─── SSH ключи (на всякий случай) ─────────────────────────────────────────────
 *.pem
