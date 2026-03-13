@@ -1,12 +1,12 @@
 # ─── locals ────────────────────────────────────────────────────────────────────
 
 locals {
-  user_data_admin = templatefile("${path.root}/meta-admin.yml", {
+  user_data_admin = templatefile("${path.module}/meta-admin.yml", {
     ssh_public_key = var.ssh_public_key
     ssh_port       = var.ssh_port
   })
 
-  user_data_node = templatefile("${path.root}/meta-node.yml", {
+  user_data_node = templatefile("${path.module}/meta-node.yml", {
     ssh_public_key = var.ssh_public_key
   })
 }

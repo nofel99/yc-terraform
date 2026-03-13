@@ -1,15 +1,29 @@
 #cloud-config
 disable_root: false
-
-
 package_update: true
 package_upgrade: true
-
 
 ssh_authorized_keys:
   - ${ssh_public_key}
 
+# Вариант 1
+
+#runcmd:
+#  - sed -i 's/^#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+#  - sed -i 's/^#*ListenAddress.*/ListenAddress 0.0.0.0/' /etc/ssh/sshd_config
+#  - systemctl restart ssh
+
+
+# Вариант 2
+
+# В современных Ubuntu/Debian /etc/ssh/sshd_config.d/ — это дроп-ин директория.
+# Настройки из неё имеют приоритет над основным конфигом. 
+# Не трогаешь системный файл — меньше риска что-то сломать.
+write_files:
+  - path: /etc/ssh/sshd_config.d/99-custom.conf
+    content: |
+      PermitRootLogin yes
+      ListenAddress 0.0.0.0
+    permissions: '0644'
 runcmd:
-  - sed -i 's/^#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
-  - echo "ListenAddress 0.0.0.0" >> /etc/ssh/sshd_config
   - systemctl restart ssh

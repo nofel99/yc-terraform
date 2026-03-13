@@ -1,7 +1,7 @@
 # ─── Security Group ─────────────────────────────────────────────────────────────
 
 resource "yandex_vpc_security_group" "main" {
-  name       = "main-sg"
+  name       = var.sg_name
   network_id = var.network_id
 
   ingress {

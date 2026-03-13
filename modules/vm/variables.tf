@@ -1,4 +1,5 @@
 variable "zone" {
+  description = "Зона в yandex.cloud, смотри документацию"
   type = string
 }
 
@@ -18,6 +19,7 @@ variable "vms" {
 }
 
 variable "image_id" {
+  description = "id образа Ubuntu, инфу посмотреть в yandex cloud"
   type = string
 }
 
@@ -32,6 +34,7 @@ variable "sg_id" {
 }
 
 variable "ssh_public_key" {
+  description = "Содержимое публичного ключа"
   type      = string
   sensitive = true
 }

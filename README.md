@@ -35,7 +35,7 @@ terraform apply
 ## Архитектура
 
 ```
-Internet → NAT Gateway → Subnet (10.10.101.0/24)
+Internet → NAT Gateway → Subnet (<subnet_cidr>)
                             ├── admin  (jump host, nat=true)
                             ├── vm-1   (control-plane)
                             ├── vm-2   (worker)
@@ -43,6 +43,7 @@ Internet → NAT Gateway → Subnet (10.10.101.0/24)
 ```
 
 ## Подключение к VM
+# аналогично для vm-2, vm-3
 
 ```
 Host admin
@@ -52,7 +53,7 @@ Host admin
   IdentityFile ~/.ssh/yc-dev
 
 Host vm-1
-  HostName 10.10.101.101
+  HostName <vm-1_internal_ip>
   User root
   ProxyJump admin
   IdentityFile ~/.ssh/yc-dev
