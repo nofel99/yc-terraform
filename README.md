@@ -1,9 +1,65 @@
-# yc-terraform
+# Terraform — Yandex Cloud
 
-admin - jump хост и на с него запускаем ansible playbooks для настройки k8s. У него публичный айпи адрес
-минимально:
-vm-1 - control node
-vm-2, vm-3 - worker nodes
+Инфраструктура Yandex Cloud на Terraform. Kubernetes кластер из 3 VM за jump host.
 
-опционально еще создаем две виртуалки:
-vm-4, vm-5 - control nodes
+## Структура
+
+```
+envs/dev/         # окружение dev (backend, variables, tfvars)
+modules/
+  networks/       # VPC, subnet, NAT gateway
+  security_group/ # firewall правила
+  vm/             # виртуальные машины
+```
+
+## Быстрый старт
+
+```bash
+# 1. Создать секреты backend
+cat > envs/dev/backend.hcl << EOF
+bucket     = "your-bucket"
+access_key = "your-key"
+secret_key = "your-secret"
+EOF
+
+# 2. Заполнить переменные
+# отредактировать envs/dev/terraform.tfvars
+
+# 3. Инициализировать и применить
+cd envs/dev
+terraform init -backend-config=backend.hcl
+terraform plan
+terraform apply
+```
+
+## Архитектура
+
+```
+Internet → NAT Gateway → Subnet (10.10.101.0/24)
+                            ├── admin  (jump host, nat=true)
+                            ├── vm-1   (control-plane)
+                            ├── vm-2   (worker)
+                            └── vm-3   (worker)
+```
+
+## Подключение к VM
+
+```
+Host admin
+  HostName <admin_external_ip>
+  User root
+  Port <ssh_port>
+  IdentityFile ~/.ssh/yc-dev
+
+Host vm-1
+  HostName 10.10.101.101
+  User root
+  ProxyJump admin
+  IdentityFile ~/.ssh/yc-dev
+```
+
+## Важно
+
+- `backend.hcl` и `*.tfvars` — **не коммитить** (секреты)
+- `.terraform.lock.hcl` — **коммитить** (фиксирует версии провайдеров)
+- State хранится в Yandex Object Storage
